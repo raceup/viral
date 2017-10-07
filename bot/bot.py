@@ -26,11 +26,12 @@ from google import gauthenticator
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
-EMAIL_ADDRESSES_FILE = os.path.join(DATA_FOLDER, "email_text.txt")
-EMAIL_TEXT_FILE = os.path.join(DATA_FOLDER, "send_to.csv")
+TODAY = datetime.now().strftime("%A, %d %B %Y")
+EMAIL_TITLE = "Race UP remainder"  # below are email-related settings
+EMAIL_ADDRESSES_FILE = os.path.join(DATA_FOLDER, "send_to.csv")
+EMAIL_TEXT_FILE = os.path.join(DATA_FOLDER, "email_text.txt")
 EMAIL_FOOTER_FILE = os.path.join(DATA_FOLDER, "email_footer.txt")
 SEND_EMAIL_FROM = "bot.raceup@gmail.com"
-TODAY = datetime.now().strftime("%A, %d %B %Y")
 
 
 def get_email_header(name_surname):
@@ -53,11 +54,11 @@ def get_email_content(file_path):
     """
 
     with open(file_path, "r") as in_file:
-        text = str(in_file)
+        text = str(in_file.read())
         return text.replace("\n", "<br>")
 
 
-def get_email_footer(file_path):
+def get_email_footer(file_path=EMAIL_FOOTER_FILE):
     """
     :param file_path: str
         Path to file with email text
@@ -122,12 +123,12 @@ class Mailer(object):
             "<html>" +
             get_email_header(self.name_surname) +
             get_email_content(EMAIL_TEXT_FILE) +
-            get_email_footer(EMAIL_FOOTER_FILE) +
+            get_email_footer() +
             "</html>", "html"
         )  # create message
 
         message["to"] = self.data["Email"]  # email recipient
-        message["subject"] = "Race UP remainder"
+        message["subject"] = EMAIL_TITLE
 
         return {
             "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
