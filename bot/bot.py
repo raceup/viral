@@ -112,9 +112,12 @@ class Mailer(object):
         self.data = raw_dict
         self.name_surname = self.data["Nome"].title() + " " + self.data[
             "Cognome"].title()
+        self.email = self.data["Email"].strip()
 
-    def get_notification_msg(self):
+    def get_notification_msg(self, email_text_file):
         """
+        :param email_text_file: str
+            File to get email text from
         :return: MIMEText
             Personalized message to notify candidates
         """
@@ -122,20 +125,22 @@ class Mailer(object):
         message = MIMEText(
             "<html>" +
             get_email_header(self.name_surname) +
-            get_email_content(EMAIL_TEXT_FILE) +
+            get_email_content(email_text_file) +
             get_email_footer() +
             "</html>", "html"
         )  # create message
 
-        message["to"] = self.data["Email"]  # email recipient
+        message["to"] = self.email  # email recipient
         message["subject"] = EMAIL_TITLE
 
         return {
             "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
         }
 
-    def notify(self):
+    def notify(self, email_text_file):
         """
+        :param email_text_file: str
+            File to get email text from
         :return: bool
             Sends me a message if today is my birthday.
             Returns true iff sent message
@@ -143,22 +148,49 @@ class Mailer(object):
 
         send_email(
             SEND_EMAIL_FROM,
-            self.get_notification_msg()
+            self.get_notification_msg(email_text_file)
         )
 
 
-def send_notifications():
+def confirm_send_notifications(mailers, email_text_file):
     """
+    :param mailers: [] of Mailer
+        List of email receivers
+    :param email_text_file: str
+        File to get email text from
+    :return: bool
+        True iff user really wants to send emails
+    """
+
+    print("Sending emails to\n")
+    print("\n".join(
+        [
+            ">>> " + mailer.name_surname + " ( " + mailer.email + " )"
+            for mailer in mailers
+            ]
+    ))
+    print("\nwith the following content:\n")
+    file_content = open(email_text_file, "r").read()
+    print(">>>", file_content.replace("\n", "\n>>> "))  # read file
+    return input("\nAre you really sure? [y/n] ").startswith("y")
+
+
+def send_notifications(email_text_file):
+    """
+    :param email_text_file: str
+        File to get email text from
     :return: void
         Runs bot
     """
 
     mailers = parse_data(EMAIL_ADDRESSES_FILE)
-    for mailer in mailers:
-        mailer = Mailer(mailer)  # parse raw csv data
-        mailer.notify()
-        print("notified " + mailer.name_surname)
-
+    mailers = [Mailer(mailer) for mailer in mailers]  # parse raw csv data
+    if confirm_send_notifications(mailers, email_text_file):
+        for mailer in mailers:
+            mailer.notify(email_text_file)
+            print("Sent email to", mailer.name_surname, "(", mailer.email, ")")
+    else:
+        print("Aborting")
 
 if __name__ == '__main__':
-    send_notifications()
+    send_notifications(EMAIL_TEXT_FILE)
