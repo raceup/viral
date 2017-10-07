@@ -25,74 +25,47 @@ from email.mime.text import MIMEText
 from google import gauthenticator
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
-DATA_FILE_PATH = os.path.join(THIS_FOLDER, "data.csv")
+DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
+EMAIL_ADDRESSES_FILE = os.path.join(DATA_FOLDER, "email_text.txt")
+EMAIL_TEXT_FILE = os.path.join(DATA_FOLDER, "send_to.csv")
+EMAIL_FOOTER_FILE = os.path.join(DATA_FOLDER, "email_footer.txt")
 SEND_EMAIL_FROM = "bot.raceup@gmail.com"
 TODAY = datetime.now().strftime("%A, %d %B %Y")
 
 
-class Mailer(object):
-    """ Candidate data """
+def get_email_header(name_surname):
+    """
+    :param name_surname: str
+        Name and surname of email receiver
+    :return: str
+        Email header
+    """
 
-    def __init__(self, raw_dict):
-        """
-        :param raw_dict: {}
-            Raw dict with values
-        """
+    return "<h2>Ciao " + str(name_surname).title() + "!</h2>"
 
-        self.data = raw_dict
-        self.name_surname = self.data["Nome"] + " " + self.data["Cognome"]
 
-    def get_notification_msg(self):
-        """
-        :return: MIMEText
-            Personalized message to notify candidates
-        """
+def get_email_content(file_path):
+    """
+    :param file_path: str
+        Path to file with email text
+    :return: str
+        Email text (html formatted)
+    """
 
-        message = MIMEText(
-            "<html>" +
-            "<h2>Ciao " + self.name_surname + "!</h2>" +
-            "<p>" +
-            "Il Race UP Team è in fase di recruitment e potresti essere il "
-            "prossimo membro! Sappiamo che sei interessato/a quindi segui <a "
-            "href=\"http://raceup.it/careers.html\">questo link</a> per "
-            "candidarti, mancano solo sei giorni!<br>Ti aspettiamo!<br>" +
-            "<br>" +
-            "<i>Race UP team</i><br>" +
-            "<a href=\"https://twitter.com/RaceUpTeam\">Twitter</a> | " +
-            "<a href=\"https://www.facebook.com/Race-UP-Team-Combustion"
-            "-440618820789/\">Facebook CD</a> | " +
-            "<a href=\"https://www.facebook.com/Race-UP-Team-Electric"
-            "-802147286569414/\"\">Facebook ED</a><br>" +
-            "<a href=\"https://www.instagram.com/race_up_team/\">Instagram"
-            "</a> | " +
-            "<a href=\"https://www.youtube.com/user/teamraceup\">Youtube</a"
-            "><br>" +
-            "<a href=\"https://it.linkedin.com/grps/Race-Up-Team-3555234"
-            "/about?\">Linkedin</a> | " +
-            "<a href=\"https://github.com/raceup\">Github</a> | " +
-            "<a href=\"mailto:info@raceup.it\">Email</a>" +
-            "</p>" +
-            "</html>", "html"
-        )  # create message
+    with open(file_path, "r") as in_file:
+        text = str(in_file)
+        return text.replace("\n", "<br>")
 
-        message["to"] = self.data["Email"]  # email recipient
-        message["subject"] = "Race UP | Mailing list " + TODAY
 
-        return {
-            "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
-        }
+def get_email_footer(file_path):
+    """
+    :param file_path: str
+        Path to file with email text
+    :return: str
+        Email text (html formatted)
+    """
 
-    def notify(self):
-        """
-        :return: bool
-            Sends me a message if today is my birthday.
-            Returns true iff sent message
-        """
-
-        send_email(
-            SEND_EMAIL_FROM,
-            self.get_notification_msg()
-        )
+    return get_email_content(file_path)
 
 
 def send_email(sender, msg):
@@ -126,13 +99,60 @@ def parse_data(file_path):
             yield row
 
 
+class Mailer(object):
+    """ Candidate data """
+
+    def __init__(self, raw_dict):
+        """
+        :param raw_dict: {}
+            Raw dict with values
+        """
+
+        self.data = raw_dict
+        self.name_surname = self.data["Nome"].title() + " " + self.data[
+            "Cognome"].title()
+
+    def get_notification_msg(self):
+        """
+        :return: MIMEText
+            Personalized message to notify candidates
+        """
+
+        message = MIMEText(
+            "<html>" +
+            get_email_header(self.name_surname) +
+            get_email_content(EMAIL_TEXT_FILE) +
+            get_email_footer(EMAIL_FOOTER_FILE) +
+            "</html>", "html"
+        )  # create message
+
+        message["to"] = self.data["Email"]  # email recipient
+        message["subject"] = "Race UP remainder"
+
+        return {
+            "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
+        }
+
+    def notify(self):
+        """
+        :return: bool
+            Sends me a message if today is my birthday.
+            Returns true iff sent message
+        """
+
+        send_email(
+            SEND_EMAIL_FROM,
+            self.get_notification_msg()
+        )
+
+
 def send_notifications():
     """
     :return: void
         Runs bot
     """
 
-    mailers = parse_data(DATA_FILE_PATH)
+    mailers = parse_data(EMAIL_ADDRESSES_FILE)
     for mailer in mailers:
         mailer = Mailer(mailer)  # parse raw csv data
         mailer.notify()

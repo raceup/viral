@@ -1,6 +1,5 @@
-bot/.user_credentials/*
-bot/data.csv
-
+bot/.user_credentials
+bot/data
 
 ### PyCharm ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
