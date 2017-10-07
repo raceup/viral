@@ -52,11 +52,10 @@ class Mailer(object):
             "<html>" +
             "<h2>Ciao " + self.name_surname + "!</h2>" +
             "<p>" +
-            "Sono il bot di Race Up, e questa è la nostra mailing list<br>" +
-            "Ti scrivo per {...}!<br>" +
-            "Sperando di {...},<br>" +
-            "<br>" +
-            "<i>Il bot di Race Up</i><br>" +
+            "Il Race UP Team è in fase di recruitment e potresti essere il "
+            "prossimo membro! Sappiamo che sei interessato/a quindi segui <a "
+            "href=\"http://raceup.it/careers.html\">questo link</a> per "
+            "candidarti, mancano solo sei giorni!<br>Ti aspettiamo!<br>" +
             "<br>" +
             "<i>Race UP team</i><br>" +
             "<a href=\"https://twitter.com/RaceUpTeam\">Twitter</a> | " +
@@ -77,7 +76,7 @@ class Mailer(object):
         )  # create message
 
         message["to"] = self.data["Email"]  # email recipient
-        message["subject"] = "Race Up | Mailing list " + TODAY
+        message["subject"] = "Race UP | Mailing list " + TODAY
 
         return {
             "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
