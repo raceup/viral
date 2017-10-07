@@ -31,7 +31,7 @@ EMAIL_TITLE = "Race UP remainder"  # below are email-related settings
 EMAIL_ADDRESSES_FILE = os.path.join(DATA_FOLDER, "send_to.csv")
 EMAIL_TEXT_FILE = os.path.join(DATA_FOLDER, "email_text.txt")
 EMAIL_FOOTER_FILE = os.path.join(DATA_FOLDER, "email_footer.txt")
-SEND_EMAIL_FROM = "bot.raceup@gmail.com"
+SEND_EMAIL_FROM = "info@raceup.it"
 
 
 def get_email_header(name_surname):
