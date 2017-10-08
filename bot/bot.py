@@ -27,7 +27,7 @@ from google import gauthenticator
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
 TODAY = datetime.now().strftime("%A, %d %B %Y")
-EMAIL_TITLE = "Race UP remainder"  # below are email-related settings
+EMAIL_TITLE = "Race UP | Mailing list of " + TODAY  # email-related settings
 EMAIL_ADDRESSES_FILE = os.path.join(DATA_FOLDER, "send_to.csv")
 EMAIL_TEXT_FILE = os.path.join(DATA_FOLDER, "email_text.txt")
 EMAIL_FOOTER_FILE = os.path.join(DATA_FOLDER, "email_footer.txt")
