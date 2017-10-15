@@ -22,8 +22,8 @@ import base64
 import csv
 import os
 
-from . import templates
-from .google import gauthenticator
+import templates
+from google import gauthenticator
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
@@ -42,8 +42,8 @@ class Recipient(object):
         """
         :param raw_dict: {}
             Raw dict with values
-        :param email_text_file: str
-            File to get email text from
+        :param email_template: EmailTemplate
+            Email template to use
         """
 
         self.data = raw_dict
@@ -109,7 +109,8 @@ def parse_data(file_path):
 
 def create_and_parse_args():
     parser = argparse.ArgumentParser(
-        usage="-e <EMAIL TEMPLATE> -c <CONTENT FILE> -a <RECIPIENTS FILE>")
+        usage="-e <EMAIL TEMPLATE> -c <CONTENT FILE> -a <RECIPIENTS FILE>\n"
+              "-help for help and usage")
     parser.add_argument("-e", dest="email_template",
                         help="Email template, one in [" + " | ".join(
                             EMAIL_TEMPLATES.keys()) + "]",
@@ -143,7 +144,7 @@ def confirm_send_notifications(recipients, email_text_file):
     print("\n".join(
         [
             ">>> " + recipient["Nome"].title() + " " + recipient[
-                "Cognome"].title() + " ( " + recipient["email"] + " )"
+                "Cognome"].title() + " (" + recipient["Email"] + ")"
             for recipient in recipients
             ]
     ))
@@ -165,7 +166,7 @@ def send_notifications(addresses_file, email_text_file, email_template):
         Runs bot
     """
 
-    recipients = parse_data(addresses_file)
+    recipients = list(parse_data(addresses_file))
     if confirm_send_notifications(recipients, email_text_file):
         for recipient in recipients:
             name_surname = recipient["Nome"].title() + " " + recipient[
@@ -174,9 +175,13 @@ def send_notifications(addresses_file, email_text_file, email_template):
                 name_surname,
                 email_text_file
             )
-            Recipient(recipient, template).notify()
+            recip = Recipient(recipient, template)
             print(
-                "Sent email to", name_surname, "(", recipient["email"], ")"
+                "Notifying", name_surname, "..."
+            )  # notify user
+            recip.notify()
+            print(
+                "\t ... sent email to", recipient["Email"]
             )  # notify user
     else:
         print("Aborting")

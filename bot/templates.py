@@ -71,7 +71,7 @@ class EmailTemplate(object):
             Email header
         """
 
-        return "<h2>Ciao " + str(self.recipient).title() + "!</h2>"
+        return "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
 
     def get_email_footer(self):
         """
