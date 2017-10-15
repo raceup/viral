@@ -15,8 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Sends emails from raceup """
+""" Sends emails from Race Up """
 
+import argparse
 import base64
 import csv
 import os
@@ -27,12 +28,10 @@ from .google import gauthenticator
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
 EMAILS_FOLDER = os.path.join(DATA_FOLDER, "emails")
-EMAIL_ADDRESSES_FILE = os.path.join(EMAILS_FOLDER, "cv_remainder.csv")
-EMAIL_TEXT_FILE = os.path.join(EMAILS_FOLDER, "cv_remainder.txt")
 SENDER = "info@raceup.it"
 EMAIL_TEMPLATES = {
-    "0": templates.MailingList,
-    "1": templates.CVRemainder
+    "mailing list": templates.MailingList,
+    "cv remainder": templates.CVRemainder
 }
 
 
@@ -108,6 +107,28 @@ def parse_data(file_path):
             yield row
 
 
+def create_and_parse_args():
+    parser = argparse.ArgumentParser(
+        usage="-e <EMAIL TEMPLATE> -c <CONTENT FILE> -a <RECIPIENTS FILE>")
+    parser.add_argument("-e", dest="email_template",
+                        help="Email template, one in [" + " | ".join(
+                            EMAIL_TEMPLATES.keys()) + "]",
+                        required=True)
+    parser.add_argument("-c", dest="content_file",
+                        help="Email content file",
+                        required=True)
+    parser.add_argument("-a", dest="recipients_file",
+                        help="Recipients file (.csv format)", required=True)
+
+    args = parser.parse_args()  # parse args
+
+    return {
+        "email_template": EMAIL_TEMPLATES[args.email_template],
+        "content_file": args.content_file,
+        "recipients_file": args.recipients_file
+    }
+
+
 def confirm_send_notifications(recipients, email_text_file):
     """
     :param recipients: [] of Mailer
@@ -132,20 +153,24 @@ def confirm_send_notifications(recipients, email_text_file):
     return input("\nAre you really sure? [y/n] ").startswith("y")
 
 
-def send_notifications(email_text_file):
+def send_notifications(addresses_file, email_text_file, email_template):
     """
+    :param addresses_file: str
+        File to get recipients data from
     :param email_text_file: str
         File to get email text from
+    :param email_template: constructor
+        Email template to use
     :return: void
         Runs bot
     """
 
-    recipients = parse_data(EMAIL_ADDRESSES_FILE)
+    recipients = parse_data(addresses_file)
     if confirm_send_notifications(recipients, email_text_file):
         for recipient in recipients:
             name_surname = recipient["Nome"].title() + " " + recipient[
                 "Cognome"].title()
-            template = templates.MailingList(
+            template = email_template(
                 name_surname,
                 email_text_file
             )
@@ -156,7 +181,19 @@ def send_notifications(email_text_file):
     else:
         print("Aborting")
 
-if __name__ == '__main__':
+
+def main():
+    """
+    :return: void
+        Sends email with user args
+    """
+
+    args = create_and_parse_args()
     send_notifications(
-        EMAIL_TEXT_FILE
+        args["recipients_file"],
+        args["content_file"],
+        args["email_template"]
     )
+
+if __name__ == '__main__':
+    main()
