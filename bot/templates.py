@@ -46,7 +46,7 @@ class EmailTemplate(object):
     """ Default email template """
 
     def __init__(self, recipient, subject, content_file,
-                 footer_file=EMAIL_FOOTER_FILE, *args, **kwargs):
+                 footer_file=EMAIL_FOOTER_FILE, extra_args=None):
         """
         :param recipient: str
             Name and surname of email recipient
@@ -56,6 +56,8 @@ class EmailTemplate(object):
             Path to file containing email actual content
         :param footer_file: str
             Path to file containing email footer (ending)
+        :param extra_args: {}
+            Extra arguments and details about recipient
         """
 
         object.__init__(self)
@@ -64,6 +66,7 @@ class EmailTemplate(object):
         self.email_subject = subject
         self.content_file = str(content_file)
         self.footer_file = str(footer_file)
+        self.data = {} if not extra_args else extra_args
 
     def get_email_header(self):
         """
@@ -101,36 +104,42 @@ class EmailTemplate(object):
 class CVRemainder(EmailTemplate):
     """ Email template to remind candidates to send their CVs """
 
-    def __init__(self, recipient, content_file):
+    def __init__(self, recipient, content_file, extra_args=None):
         """
         :param recipient: str
             Name and surname of email recipient
+        :param extra_args: {}
+            Extra arguments and details about recipient
         """
 
         EmailTemplate.__init__(
             self,
             recipient,
             "Race UP remainder",
-            content_file
+            content_file,
+            extra_args=extra_args
         )
 
 
 class MailingList(EmailTemplate):
     """ Email template for classical Race Up newsletter """
 
-    def __init__(self, recipient, content_file):
+    def __init__(self, recipient, content_file, extra_args=None):
         """
         :param recipient: str
             Name and surname of email recipient
         :param content_file: str
             Path to file containing email actual content
+        :param extra_args: {}
+            Extra arguments and details about recipient
         """
 
         EmailTemplate.__init__(
             self,
             recipient,
             "Race UP | Mailing list of " + TODAY,
-            content_file
+            content_file,
+            extra_args=extra_args
         )
 
 
@@ -138,24 +147,27 @@ class JobInterview(EmailTemplate):
     """ Email template to notify candidates about time and place of their
     interview """
 
-    def __init__(self, recipient, content_file, date, time, place):
+    def __init__(self, recipient, content_file, extra_args):
         """
         :param recipient: str
             Name and surname of email recipient
         :param content_file: str
             Path to file containing email actual content
+        :param extra_args: {}
+            Details about date, time and place of the interview
         """
 
         EmailTemplate.__init__(
             self,
             recipient,
             "Race Up | Colloquio",
-            content_file
+            content_file,
+            extra_args=extra_args
         )
 
-        self.date = str(date)
-        self.time = str(time)
-        self.place = str(place)
+        self.date = self.data["Data"]
+        self.time = self.data["Ora"]
+        self.place = self.data["Luogo"]
 
     def get_email_header(self):
         """

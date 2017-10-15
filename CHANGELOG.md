@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.1.4 - 2017-10-15
+
+### Fixed
+- bad if-else to handle job interview templates
+
+### Changed
+- email footer complete link
+
 ## 0.1.3 - 2017-10-15
 
 ### Added

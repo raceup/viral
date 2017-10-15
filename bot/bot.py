@@ -175,19 +175,11 @@ def send_notifications(addresses_file, email_text_file, email_template):
             name_surname = recipient["Nome"].title() + " " + recipient[
                 "Cognome"].title()
 
-            if email_template == templates.JobInterview:
-                template = templates.JobInterview(
-                    name_surname,
-                    email_text_file,
-                    recipient["Data"],
-                    recipient["Ora"],
-                    recipient["Luogo"]
-                )
-            else:  # TODO add (*args, **kwargs) in EmailTemplate
-                template = email_template(
-                    name_surname,
-                    email_text_file
-                )
+            template = email_template(
+                name_surname,
+                email_text_file,
+                extra_args=recipient
+            )  # create email template specific for this user
             recip = Recipient(recipient, template)
             print(
                 "Notifying", name_surname, "..."
