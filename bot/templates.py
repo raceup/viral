@@ -46,7 +46,7 @@ class EmailTemplate(object):
     """ Default email template """
 
     def __init__(self, recipient, subject, content_file,
-                 footer_file=EMAIL_FOOTER_FILE):
+                 footer_file=EMAIL_FOOTER_FILE, *args, **kwargs):
         """
         :param recipient: str
             Name and surname of email recipient
