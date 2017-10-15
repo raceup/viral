@@ -138,7 +138,7 @@ class JobInterview(EmailTemplate):
     """ Email template to notify candidates about time and place of their
     interview """
 
-    def __init__(self, recipient, date, time, place, content_file):
+    def __init__(self, recipient, content_file, date, time, place):
         """
         :param recipient: str
             Name and surname of email recipient
@@ -165,6 +165,7 @@ class JobInterview(EmailTemplate):
 
         text = "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
         text += "a seguito della tua domanda per l'ingresso nel Race UP Team," \
-                "ti comunichiamo che il colloquio si terrà" + "<b>" + \
+                "ti comunichiamo che il colloquio si terrà il " + "<b>" + \
                 self.date + "</b> alle ore <b>" + self.time + "</b> in <b>" \
                 + self.place + "</b>.<br>"
+        return text

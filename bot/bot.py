@@ -21,6 +21,7 @@ import argparse
 import base64
 import csv
 import os
+import time
 
 import templates
 from google import gauthenticator
@@ -34,6 +35,7 @@ EMAIL_TEMPLATES = {
     "cv remainder": templates.CVRemainder,
     "colloquio": templates.JobInterview
 }
+TIME_INTERVAL_BETWEEN_EMAILS = 1  # seconds to wait before sending next email
 
 
 class Recipient(object):
@@ -172,9 +174,12 @@ def send_notifications(addresses_file, email_text_file, email_template):
         for recipient in recipients:
             name_surname = recipient["Nome"].title() + " " + recipient[
                 "Cognome"].title()
-            template = email_template(
+            template = templates.JobInterview(
                 name_surname,
-                email_text_file
+                email_text_file,
+                recipient["Data"],
+                recipient["Ora"],
+                recipient["Luogo"]
             )
             recip = Recipient(recipient, template)
             print(
@@ -184,6 +189,7 @@ def send_notifications(addresses_file, email_text_file, email_template):
             print(
                 "\t ... sent email to", recipient["Email"]
             )  # notify user
+            time.sleep(TIME_INTERVAL_BETWEEN_EMAILS)
     else:
         print("Aborting")
 
