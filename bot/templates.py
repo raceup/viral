@@ -165,7 +165,7 @@ class JobInterview(EmailTemplate):
 
         text = "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
         text += "a seguito della tua domanda per l'ingresso nel Race UP Team," \
-                "ti comunichiamo che il colloquio si terrà il " + "<b>" + \
+                " ti comunichiamo che il colloquio si terrà il " + "<b>" + \
                 self.date + "</b> alle ore <b>" + self.time + "</b> in <b>" \
                 + self.place + "</b>.<br>"
         return text
