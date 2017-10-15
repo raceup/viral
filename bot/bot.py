@@ -15,58 +15,66 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+""" Sends emails from raceup """
 
 import base64
 import csv
 import os
-from datetime import datetime
-from email.mime.text import MIMEText
 
-from google import gauthenticator
+from . import templates
+from .google import gauthenticator
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
-TODAY = datetime.now().strftime("%A, %d %B %Y")
-EMAIL_TITLE = "Race UP | Mailing list of " + TODAY  # email-related settings
-EMAIL_ADDRESSES_FILE = os.path.join(DATA_FOLDER, "send_to.csv")
-EMAIL_TEXT_FILE = os.path.join(DATA_FOLDER, "email_text.txt")
-EMAIL_FOOTER_FILE = os.path.join(DATA_FOLDER, "email_footer.txt")
-SEND_EMAIL_FROM = "info@raceup.it"
+EMAILS_FOLDER = os.path.join(DATA_FOLDER, "emails")
+EMAIL_ADDRESSES_FILE = os.path.join(EMAILS_FOLDER, "cv_remainder.csv")
+EMAIL_TEXT_FILE = os.path.join(EMAILS_FOLDER, "cv_remainder.txt")
+SENDER = "info@raceup.it"
+EMAIL_TEMPLATES = {
+    "0": templates.MailingList,
+    "1": templates.CVRemainder
+}
 
 
-def get_email_header(name_surname):
-    """
-    :param name_surname: str
-        Name and surname of email receiver
-    :return: str
-        Email header
-    """
+class Recipient(object):
+    """ Candidate data """
 
-    return "<h2>Ciao " + str(name_surname).title() + "!</h2>"
+    def __init__(self, raw_dict, email_template):
+        """
+        :param raw_dict: {}
+            Raw dict with values
+        :param email_text_file: str
+            File to get email text from
+        """
 
+        self.data = raw_dict
+        self.email = self.data["Email"].strip()
+        self.email_template = email_template
 
-def get_email_content(file_path):
-    """
-    :param file_path: str
-        Path to file with email text
-    :return: str
-        Email text (html formatted)
-    """
+    def get_notification_msg(self):
+        """
+        :return: MIMEText
+            Personalized message to notify candidates
+        """
 
-    with open(file_path, "r") as in_file:
-        text = str(in_file.read())
-        return text.replace("\n", "<br>")
+        message = self.email_template.get_mime_message()
+        message["to"] = self.email  # email recipient
 
+        return {
+            "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
+        }
 
-def get_email_footer(file_path=EMAIL_FOOTER_FILE):
-    """
-    :param file_path: str
-        Path to file with email text
-    :return: str
-        Email text (html formatted)
-    """
+    def notify(self):
+        """
+        :return: bool
+            Sends me a message if today is my birthday.
+            Returns true iff sent message
+        """
 
-    return get_email_content(file_path)
+        send_email(
+            SENDER,
+            self.get_notification_msg()
+        )
 
 
 def send_email(sender, msg):
@@ -100,61 +108,9 @@ def parse_data(file_path):
             yield row
 
 
-class Mailer(object):
-    """ Candidate data """
-
-    def __init__(self, raw_dict):
-        """
-        :param raw_dict: {}
-            Raw dict with values
-        """
-
-        self.data = raw_dict
-        self.name_surname = self.data["Nome"].title() + " " + self.data[
-            "Cognome"].title()
-        self.email = self.data["Email"].strip()
-
-    def get_notification_msg(self, email_text_file):
-        """
-        :param email_text_file: str
-            File to get email text from
-        :return: MIMEText
-            Personalized message to notify candidates
-        """
-
-        message = MIMEText(
-            "<html>" +
-            get_email_header(self.name_surname) +
-            get_email_content(email_text_file) +
-            get_email_footer() +
-            "</html>", "html"
-        )  # create message
-
-        message["to"] = self.email  # email recipient
-        message["subject"] = EMAIL_TITLE
-
-        return {
-            "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
-        }
-
-    def notify(self, email_text_file):
-        """
-        :param email_text_file: str
-            File to get email text from
-        :return: bool
-            Sends me a message if today is my birthday.
-            Returns true iff sent message
-        """
-
-        send_email(
-            SEND_EMAIL_FROM,
-            self.get_notification_msg(email_text_file)
-        )
-
-
-def confirm_send_notifications(mailers, email_text_file):
+def confirm_send_notifications(recipients, email_text_file):
     """
-    :param mailers: [] of Mailer
+    :param recipients: [] of Mailer
         List of email receivers
     :param email_text_file: str
         File to get email text from
@@ -165,8 +121,9 @@ def confirm_send_notifications(mailers, email_text_file):
     print("Sending emails to\n")
     print("\n".join(
         [
-            ">>> " + mailer.name_surname + " ( " + mailer.email + " )"
-            for mailer in mailers
+            ">>> " + recipient["Nome"].title() + " " + recipient[
+                "Cognome"].title() + " ( " + recipient["email"] + " )"
+            for recipient in recipients
             ]
     ))
     print("\nwith the following content:\n")
@@ -183,14 +140,23 @@ def send_notifications(email_text_file):
         Runs bot
     """
 
-    mailers = parse_data(EMAIL_ADDRESSES_FILE)
-    mailers = [Mailer(mailer) for mailer in mailers]  # parse raw csv data
-    if confirm_send_notifications(mailers, email_text_file):
-        for mailer in mailers:
-            mailer.notify(email_text_file)
-            print("Sent email to", mailer.name_surname, "(", mailer.email, ")")
+    recipients = parse_data(EMAIL_ADDRESSES_FILE)
+    if confirm_send_notifications(recipients, email_text_file):
+        for recipient in recipients:
+            name_surname = recipient["Nome"].title() + " " + recipient[
+                "Cognome"].title()
+            template = templates.MailingList(
+                name_surname,
+                email_text_file
+            )
+            Recipient(recipient, template).notify()
+            print(
+                "Sent email to", name_surname, "(", recipient["email"], ")"
+            )  # notify user
     else:
         print("Aborting")
 
 if __name__ == '__main__':
-    send_notifications(EMAIL_TEXT_FILE)
+    send_notifications(
+        EMAIL_TEXT_FILE
+    )

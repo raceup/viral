@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.1.3 - 2017-10-15
+
+### Added
+- email templates hierarchy
+
 ## 0.1.2 - 2017-10-07
 
 ### Changed
