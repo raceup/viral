@@ -31,7 +31,8 @@ EMAILS_FOLDER = os.path.join(DATA_FOLDER, "emails")
 SENDER = "info@raceup.it"
 EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
-    "cv remainder": templates.CVRemainder
+    "cv remainder": templates.CVRemainder,
+    "colloquio": templates.JobInterview
 }
 
 

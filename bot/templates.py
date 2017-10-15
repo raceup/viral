@@ -116,7 +116,7 @@ class CVRemainder(EmailTemplate):
 
 
 class MailingList(EmailTemplate):
-    """ Email template to remind candidates to send their CVs """
+    """ Email template for classical Race Up newsletter """
 
     def __init__(self, recipient, content_file):
         """
@@ -132,3 +132,39 @@ class MailingList(EmailTemplate):
             "Race UP | Mailing list of " + TODAY,
             content_file
         )
+
+
+class JobInterview(EmailTemplate):
+    """ Email template to notify candidates about time and place of their
+    interview """
+
+    def __init__(self, recipient, date, time, place, content_file):
+        """
+        :param recipient: str
+            Name and surname of email recipient
+        :param content_file: str
+            Path to file containing email actual content
+        """
+
+        EmailTemplate.__init__(
+            self,
+            recipient,
+            "Race Up | Colloquio",
+            content_file
+        )
+
+        self.date = str(date)
+        self.time = str(time)
+        self.place = str(place)
+
+    def get_email_header(self):
+        """
+        :return: str
+            Email header
+        """
+
+        text = "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
+        text += "a seguito della tua domanda per l'ingresso nel Race UP Team," \
+                "ti comunichiamo che il colloquio si terrà" + "<b>" + \
+                self.date + "</b> alle ore <b>" + self.time + "</b> in <b>" \
+                + self.place + "</b>.<br>"
