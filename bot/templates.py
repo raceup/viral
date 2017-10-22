@@ -19,7 +19,9 @@
 
 import os
 from datetime import datetime
-from email.mime.text import MIMEText
+
+from hal.internet.email.templates import EmailTemplate
+from hal.time.dates import get_next_weekday, Weekday
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
@@ -27,78 +29,6 @@ EMAILS_FOLDER = os.path.join(DATA_FOLDER, "emails")
 EMAIL_FOOTER_FILE = os.path.join(DATA_FOLDER, "email_footer.txt")
 RECIPIENTS_FOLDER = os.path.join(DATA_FOLDER, "address_book")
 TODAY = datetime.now().strftime("%A, %d %B %Y")
-
-
-def get_email_content(file_path):
-    """
-    :param file_path: str
-        Path to file with email text
-    :return: str
-        Email text (html formatted)
-    """
-
-    with open(file_path, "r") as in_file:
-        text = str(in_file.read())
-        return text.replace("\n", "<br>")
-
-
-class EmailTemplate(object):
-    """ Default email template """
-
-    def __init__(self, recipient, subject, content_file,
-                 footer_file=EMAIL_FOOTER_FILE, extra_args=None):
-        """
-        :param recipient: str
-            Name and surname of email recipient
-        :param subject: str
-            Title of email
-        :param content_file: str
-            Path to file containing email actual content
-        :param footer_file: str
-            Path to file containing email footer (ending)
-        :param extra_args: {}
-            Extra arguments and details about recipient
-        """
-
-        object.__init__(self)
-
-        self.recipient = str(recipient).title().strip()
-        self.email_subject = subject
-        self.content_file = str(content_file)
-        self.footer_file = str(footer_file)
-        self.data = {} if not extra_args else extra_args
-
-    def get_email_header(self):
-        """
-        :return: str
-            Email header
-        """
-
-        return "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
-
-    def get_email_footer(self):
-        """
-        :return: str
-            Email text (html formatted)
-        """
-
-        return get_email_content(self.footer_file)
-
-    def get_mime_message(self):
-        """
-        :return: MIMEText
-            Email formatted as HTML ready to be sent
-        """
-
-        message = MIMEText(
-            "<html>" +
-            self.get_email_header() +
-            get_email_content(self.content_file) +
-            self.get_email_footer() +
-            "</html>", "html"
-        )
-        message["subject"] = self.email_subject
-        return message
 
 
 class CVRemainder(EmailTemplate):
@@ -117,6 +47,7 @@ class CVRemainder(EmailTemplate):
             recipient,
             "Race UP remainder",
             content_file,
+            EMAIL_FOOTER_FILE,
             extra_args=extra_args
         )
 
@@ -139,6 +70,7 @@ class MailingList(EmailTemplate):
             recipient,
             "Race UP | Mailing list of " + TODAY,
             content_file,
+            EMAIL_FOOTER_FILE,
             extra_args=extra_args
         )
 
@@ -162,6 +94,7 @@ class JobInterview(EmailTemplate):
             recipient,
             "Race Up | Colloquio",
             content_file,
+            EMAIL_FOOTER_FILE,
             extra_args=extra_args
         )
 
@@ -180,4 +113,40 @@ class JobInterview(EmailTemplate):
                 " ti comunichiamo che il colloquio si terrà il " + "<b>" + \
                 self.date + "</b> alle ore <b>" + self.time + "</b> in <b>" \
                 + self.place + "</b>.<br>"
+        return text
+
+
+class CakeRemainder(EmailTemplate):
+    """ Email template to notify Race Up members to bring a slice of cake
+    on weekly saturday meetings """
+
+    def __init__(self, recipient, content_file, extra_args=None):
+        """
+        :param recipient: str
+            Name and surname of email recipient
+        :param content_file: str
+            Path to file containing email actual content
+        :param extra_args: {}
+            Details about next meeting date
+        """
+
+        EmailTemplate.__init__(
+            self,
+            recipient,
+            "Race Up | Il bot delle torte",
+            content_file,
+            EMAIL_FOOTER_FILE,
+            extra_args=extra_args
+        )
+
+    def get_email_header(self):
+        """
+        :return: str
+            Email header
+        """
+
+        date_remainder = get_next_weekday(Weekday.SATURDAY)
+        text = "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
+        text += "<br>Ti scrivo per ricordarti di portare almeno una torta "
+        text += " il prossimo sabato " + str(date_remainder) + " in OZ!<br>"
         return text

@@ -24,7 +24,7 @@ import os
 import time
 
 import templates
-from hal.internet import gmail
+from hal.internet.email import gmail
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
@@ -34,7 +34,8 @@ SENDER = "info@raceup.it"
 EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
     "cv remainder": templates.CVRemainder,
-    "colloquio": templates.JobInterview
+    "colloquio": templates.JobInterview,
+    "cakes": templates.CakeRemainder
 }
 EMAIL_DRIVER = gmail.GMailApiOAuth(
     "Race Up Viral",
