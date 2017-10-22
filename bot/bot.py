@@ -24,10 +24,11 @@ import os
 import time
 
 import templates
-from google import gauthenticator
+from hal.internet import gmail
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
+OAUTH_FOLDER = os.path.join(THIS_FOLDER, ".user_credentials", "gmail")
 EMAILS_FOLDER = os.path.join(DATA_FOLDER, "emails")
 SENDER = "info@raceup.it"
 EMAIL_TEMPLATES = {
@@ -35,6 +36,11 @@ EMAIL_TEMPLATES = {
     "cv remainder": templates.CVRemainder,
     "colloquio": templates.JobInterview
 }
+EMAIL_DRIVER = gmail.GMailApiOAuth(
+    "Race Up Viral",
+    os.path.join(OAUTH_FOLDER, "client_secret.json"),
+    os.path.join(OAUTH_FOLDER, "gmail.json")
+).create_driver()
 TIME_INTERVAL_BETWEEN_EMAILS = 1  # seconds to wait before sending next email
 
 
@@ -73,27 +79,22 @@ class Recipient(object):
             Returns true iff sent message
         """
 
-        send_email(
-            SENDER,
-            self.get_notification_msg()
-        )
+        send_email(self.get_notification_msg())
 
 
-def send_email(sender, msg):
+def send_email(msg):
     """
-    :param sender: str
-        Sender of email
     :param msg: str
         Message to send to me
     :return: void
         Sends email to me with this message
     """
 
-    service = gauthenticator.create_gmail_driver()
-    service.users().messages().send(
-        userId=sender,
-        body=msg
-    ).execute()  # send message
+    gmail.send_email(
+        SENDER,
+        msg,
+        EMAIL_DRIVER
+    )
 
 
 def parse_data(file_path):
@@ -205,6 +206,7 @@ def main():
         args["content_file"],
         args["email_template"]
     )
+
 
 if __name__ == '__main__':
     main()
