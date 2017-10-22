@@ -35,7 +35,7 @@ EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
     "cv remainder": templates.CVRemainder,
     "colloquio": templates.JobInterview,
-    "happy birthday": templates.HappyBirthday
+    "cakes": templates.CakeRemainder
 }
 EMAIL_DRIVER = gmail.GMailApiOAuth(
     "Race Up Viral",
