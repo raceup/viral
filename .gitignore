@@ -300,3 +300,4 @@ fabric.properties
 modules.xml
 .idea/misc.xml 
 *.ipr
+/bot/data/address_book/esito.csv

@@ -35,7 +35,8 @@ EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
     "cv remainder": templates.CVRemainder,
     "colloquio": templates.JobInterview,
-    "cakes": templates.CakeRemainder
+    "cakes": templates.CakeRemainder,
+    "esito": templates.JobInterviewResult
 }
 EMAIL_DRIVER = gmail.GMailApiOAuth(
     "Race Up Viral",
@@ -153,9 +154,7 @@ def confirm_send_notifications(recipients, email_text_file):
             for recipient in recipients
             ]
     ))
-    print("\nwith the following content:\n")
-    file_content = open(email_text_file, "r").read()
-    print(">>>", file_content.replace("\n", "\n>>> "))  # read file
+    print("\nwith content from >>> '", email_text_file, "'")
     return input("\nAre you really sure? [y/n] ").startswith("y")
 
 

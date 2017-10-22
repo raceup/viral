@@ -150,3 +150,45 @@ class CakeRemainder(EmailTemplate):
         text += "<br>Ti scrivo per ricordarti di portare almeno una torta "
         text += " il prossimo sabato " + str(date_remainder) + " in OZ!<br>"
         return text
+
+
+class JobInterviewResult(EmailTemplate):
+    """ Email template to notify candidates about the result of their
+    interview """
+
+    def __init__(self, recipient, content_folder, extra_args):
+        """
+        :param recipient: str
+            Name and surname of email recipient
+        :param content_folder: str
+            Path to folder containing possible answers
+        :param extra_args: {}
+            Details about date, time and place of the interview
+        """
+
+        EmailTemplate.__init__(
+            self,
+            recipient,
+            "Race Up | Esito colloquio",
+            JobInterviewResult.get_content_file_from_result(
+                content_folder, extra_args["Tipo risposta"]
+            ),
+            EMAIL_FOOTER_FILE,
+            extra_args=extra_args
+        )
+
+    @staticmethod
+    def get_content_file_from_result(folder, result):
+        """
+        :param folder: str
+            Path to folder containing possible answers
+        :param result: str
+            Result of interview (as in .csv file)
+        :return: str
+            Path to content file
+        """
+
+        return os.path.join(
+            folder,
+            str(result).strip() + ".txt"
+        )
