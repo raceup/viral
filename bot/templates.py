@@ -20,6 +20,7 @@
 import os
 from datetime import datetime
 from email.mime.text import MIMEText
+from hal.time.dates import get_next_weekday, Weekday
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
@@ -180,4 +181,39 @@ class JobInterview(EmailTemplate):
                 " ti comunichiamo che il colloquio si terrà il " + "<b>" + \
                 self.date + "</b> alle ore <b>" + self.time + "</b> in <b>" \
                 + self.place + "</b>.<br>"
+        return text
+
+
+class HappyBirthday(EmailTemplate):
+    """ Email template to notify Race Up members to bring a slice of cake
+    on weekly saturday meetings """
+
+    def __init__(self, recipient, content_file, extra_args=None):
+        """
+        :param recipient: str
+            Name and surname of email recipient
+        :param content_file: str
+            Path to file containing email actual content
+        :param extra_args: {}
+            Details about next meeting date
+        """
+
+        EmailTemplate.__init__(
+            self,
+            recipient,
+            "Race Up | Il bot delle torte",
+            content_file,
+            extra_args=extra_args
+        )
+
+    def get_email_header(self):
+        """
+        :return: str
+            Email header
+        """
+
+        date_remainder = get_next_weekday(Weekday.SATURDAY)
+        text = "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
+        text += "<br>Ti scrivo per ricordarti di portare almeno una torta "
+        text += " il prossimo sabato " + str(date_remainder) + " in OZ!<br>"
         return text
