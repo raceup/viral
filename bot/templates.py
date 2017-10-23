@@ -177,6 +177,14 @@ class JobInterviewResult(EmailTemplate):
             extra_args=extra_args
         )
 
+    def get_email_header(self):
+        """
+        :return: str
+            Email header
+        """
+
+        return "<h4>Caro/a " + str(self.recipient).title() + ",</h4><br>"
+
     @staticmethod
     def get_content_file_from_result(folder, result):
         """
