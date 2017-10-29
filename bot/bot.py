@@ -18,19 +18,12 @@
 """ Sends emails from Race Up """
 
 import argparse
-import base64
 import csv
-import os
 import time
 
-import templates
-from hal.internet.email import gmail
+from . import templates
+from .emails import Recipient
 
-THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
-DATA_FOLDER = os.path.join(THIS_FOLDER, "data")
-OAUTH_FOLDER = os.path.join(THIS_FOLDER, ".user_credentials", "gmail")
-EMAILS_FOLDER = os.path.join(DATA_FOLDER, "emails")
-SENDER = "info@raceup.it"
 EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
     "cv remainder": templates.CVRemainder,
@@ -38,65 +31,7 @@ EMAIL_TEMPLATES = {
     "cakes": templates.CakeRemainder,
     "esito": templates.JobInterviewResult
 }
-EMAIL_DRIVER = gmail.GMailApiOAuth(
-    "Race Up Viral",
-    os.path.join(OAUTH_FOLDER, "client_secret.json"),
-    os.path.join(OAUTH_FOLDER, "gmail.json")
-).create_driver()
 TIME_INTERVAL_BETWEEN_EMAILS = 1  # seconds to wait before sending next email
-
-
-class Recipient(object):
-    """ Candidate data """
-
-    def __init__(self, raw_dict, email_template):
-        """
-        :param raw_dict: {}
-            Raw dict with values
-        :param email_template: EmailTemplate
-            Email template to use
-        """
-
-        self.data = raw_dict
-        self.email = self.data["Email"].strip()
-        self.email_template = email_template
-
-    def get_notification_msg(self):
-        """
-        :return: MIMEText
-            Personalized message to notify candidates
-        """
-
-        message = self.email_template.get_mime_message()
-        message["to"] = self.email  # email recipient
-
-        return {
-            "raw": base64.urlsafe_b64encode(message.as_bytes()).decode()
-        }
-
-    def notify(self):
-        """
-        :return: bool
-            Sends me a message if today is my birthday.
-            Returns true iff sent message
-        """
-
-        send_email(self.get_notification_msg())
-
-
-def send_email(msg):
-    """
-    :param msg: str
-        Message to send to me
-    :return: void
-        Sends email to me with this message
-    """
-
-    gmail.send_email(
-        SENDER,
-        msg,
-        EMAIL_DRIVER
-    )
 
 
 def parse_data(file_path):
