@@ -183,6 +183,10 @@ class JobInterviewResult(EmailTemplate):
             Email header
         """
 
+        if self.data["Esito"] == "PRESO":
+            return "<h4>Welcome to Race Up " + str(self.recipient).title() \
+                   + "</h4><br>"
+
         return "<h4>Caro/a " + str(self.recipient).title() + ",</h4><br>"
 
     @staticmethod
