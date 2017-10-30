@@ -18,11 +18,11 @@
 """ Sends emails from Race Up """
 
 import argparse
-import csv
 import time
 
 import templates
 from emails import Recipient
+from hal.files.parsers import CSVParser
 
 EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
@@ -32,20 +32,6 @@ EMAIL_TEMPLATES = {
     "esito": templates.JobInterviewResult
 }
 TIME_INTERVAL_BETWEEN_EMAILS = 1  # seconds to wait before sending next email
-
-
-def parse_data(file_path):
-    """
-    :param file_path: str
-        Path to file to parse
-    :return: (generator of) [] of {}
-        List of items in data with specified attrs
-    """
-
-    reader = csv.DictReader(open(file_path, "r"))
-    for row in reader:
-        if row:
-            yield row
 
 
 def create_and_parse_args():
@@ -105,7 +91,7 @@ def send_notifications(addresses_file, email_text_file, email_template):
         Runs bot
     """
 
-    recipients = list(parse_data(addresses_file))
+    recipients = list(CSVParser(addresses_file).get_dicts())
     if confirm_send_notifications(recipients, email_text_file):
         for recipient in recipients:
             name_surname = recipient["Nome"].title() + " " + recipient[
