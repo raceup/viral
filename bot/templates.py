@@ -184,8 +184,17 @@ class JobInterviewResult(EmailTemplate):
         """
 
         if self.data["Esito"] == "PRESO":
-            return "<h4>Welcome to Race Up " + str(self.recipient).title() \
-                   + "</h4><br>"
+            header = "<h4>Welcome to Race Up " + str(self.recipient).title() \
+                     + "</h4><br>"
+            header += "Siamo lieti di comunicarti che il tuo colloquio ha " \
+                      "avuto esito positivo, ci sei sembrato un candidato " \
+                      "preparato e motivato, elementi                      " \
+                      "fondamentali per la riuscita del nostro progetto. Da " \
+                      "oggi anche tu fai parte del Race UP Team! A breve " \
+                      "conoscerai la squadra e i tuoi compagni di lavoro del " \
+                      "reparto " + self.data["Reparto"] + " " + self.data[
+                          "Divisione"] + "."
+            return header
 
         return "<h4>Caro/a " + str(self.recipient).title() + ",</h4><br>"
 
