@@ -20,9 +20,10 @@
 import argparse
 import time
 
-import templates
-from emails import Recipient
 from hal.files.parsers import CSVParser
+
+from . import templates
+from .emails import Recipient
 
 EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
