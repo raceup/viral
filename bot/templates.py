@@ -184,8 +184,8 @@ class JobInterviewResult(EmailTemplate):
         """
 
         if self.data["Esito"] == "PRESO":
-            header = "<h4>Welcome to Race Up " + str(self.recipient).title() \
-                     + "</h4><br>"
+            header = "<h2>Welcome to Race Up " + str(self.recipient).title() \
+                     + " !</h2>"
             header += "Siamo lieti di comunicarti che il tuo colloquio ha " \
                       "avuto esito positivo, ci sei sembrato un candidato " \
                       "preparato e motivato, elementi                      " \
@@ -196,7 +196,7 @@ class JobInterviewResult(EmailTemplate):
                           "Divisione"] + "."
             return header
 
-        return "<h4>Caro/a " + str(self.recipient).title() + ",</h4><br>"
+        return "<h2>Ciao " + str(self.recipient).title() + ",</h2><br>"
 
     @staticmethod
     def get_content_file(folder, data):

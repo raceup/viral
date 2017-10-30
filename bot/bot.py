@@ -120,10 +120,15 @@ def send_notifications(addresses_file, email_text_file, email_template):
             print(
                 "Notifying", name_surname, "..."
             )  # notify user
-            recip.notify()
-            print(
-                "\t ... sent email to", recipient["Email"]
-            )  # notify user
+            try:
+                recip.notify()
+                print(
+                    "\t ... sent email to", recipient["Email"]
+                )  # notify user
+            except:
+                print(
+                    "\t CANNOT send email to", recipient["Email"]
+                )
             time.sleep(TIME_INTERVAL_BETWEEN_EMAILS)
     else:
         print("Aborting")
