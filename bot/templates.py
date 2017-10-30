@@ -196,7 +196,7 @@ class JobInterviewResult(EmailTemplate):
                           "Divisione"] + "."
             return header
 
-        return "<h2>Ciao " + str(self.recipient).title() + ",</h2><br>"
+        return "<h2>Ciao " + str(self.recipient).title() + ",</h2>  "
 
     @staticmethod
     def get_content_file(folder, data):
