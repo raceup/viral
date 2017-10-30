@@ -171,7 +171,7 @@ class JobInterviewResult(EmailTemplate):
             recipient,
             "Race Up | Esito colloquio",
             JobInterviewResult.get_content_file(
-                content_folder, extra_args["Tipo risposta"]
+                content_folder, extra_args
             ),
             EMAIL_FOOTER_FILE,
             extra_args=extra_args
@@ -199,17 +199,23 @@ class JobInterviewResult(EmailTemplate):
         return "<h4>Caro/a " + str(self.recipient).title() + ",</h4><br>"
 
     @staticmethod
-    def get_content_file(folder, result):
+    def get_content_file(folder, data):
         """
         :param folder: str
             Path to folder containing possible answers
-        :param result: str
+        :param data: str
             Result of interview (as in .csv file)
         :return: str
             Path to content file
         """
 
+        if data["Esito"] == "PRESO" and len(data["Tipo risposta"]) < 2:
+            return os.path.join(
+                folder,
+                "Preso.txt"
+            )
+
         return os.path.join(
             folder,
-            str(result).strip() + ".txt"
+            str(data["Tipo risposta"]).strip() + ".txt"
         )

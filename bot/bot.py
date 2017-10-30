@@ -21,8 +21,8 @@ import argparse
 import csv
 import time
 
-from . import templates
-from .emails import Recipient
+import templates
+from emails import Recipient
 
 EMAIL_TEMPLATES = {
     "mailing list": templates.MailingList,
