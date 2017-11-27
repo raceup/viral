@@ -26,7 +26,7 @@ from . import templates
 from .emails import Recipient
 
 EMAIL_TEMPLATES = {
-    "mailing list": templates.MailingList,
+    "mailing list": templates.Newsletter,
     "cv remainder": templates.CVRemainder,
     "colloquio": templates.JobInterview,
     "cakes": templates.CakeRemainder,

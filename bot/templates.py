@@ -52,7 +52,7 @@ class CVRemainder(EmailTemplate):
         )
 
 
-class MailingList(EmailTemplate):
+class Newsletter(EmailTemplate):
     """ Email template for classical Race Up newsletter """
 
     def __init__(self, recipient, content_file, extra_args=None):
@@ -73,6 +73,15 @@ class MailingList(EmailTemplate):
             EMAIL_FOOTER_FILE,
             extra_args=extra_args
         )
+
+    def get_email_header(self):
+        recipient_title = "Ciao"
+        if self.data["Sponsor"].lower() == "true":
+            recipient_title = "Spett."
+
+        return "<h2>" + \
+               recipient_title + " " + str(self.recipient).title() + \
+               "</h2>"
 
 
 class JobInterview(EmailTemplate):
@@ -103,11 +112,6 @@ class JobInterview(EmailTemplate):
         self.place = self.data["Luogo"]
 
     def get_email_header(self):
-        """
-        :return: str
-            Email header
-        """
-
         text = "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
         text += "a seguito della tua domanda per l'ingresso nel Race UP Team," \
                 " ti comunichiamo che il colloquio si terrà il " + "<b>" + \
@@ -140,11 +144,6 @@ class CakeRemainder(EmailTemplate):
         )
 
     def get_email_header(self):
-        """
-        :return: str
-            Email header
-        """
-
         date_remainder = get_next_weekday(Weekday.SATURDAY)
         text = "<h2>Ciao " + str(self.recipient).title() + "!</h2><br>"
         text += "<br>Ti scrivo per ricordarti di portare almeno una torta "
@@ -178,11 +177,6 @@ class JobInterviewResult(EmailTemplate):
         )
 
     def get_email_header(self):
-        """
-        :return: str
-            Email header
-        """
-
         if self.data["Esito"] == "PRESO":
             header = "<h2>Welcome to Race Up " + str(self.recipient).title() \
                      + " !</h2>"
