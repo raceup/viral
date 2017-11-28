@@ -75,9 +75,9 @@ class Newsletter(EmailTemplate):
         )
 
     def get_email_header(self):
-        recipient_title = "Ciao"
-        if self.data["Sponsor"].lower() == "true":
-            recipient_title = "Spett."
+        recipient_title = "Ciao"  # for students
+        if "Sponsor" in self.data and self.data["Sponsor"].lower() == "true":
+            recipient_title = "Spett."  # for sponsors
 
         return "<h2>" + \
                recipient_title + " " + str(self.recipient).title() + \

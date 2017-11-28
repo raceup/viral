@@ -20,10 +20,10 @@
 import argparse
 import time
 
+import templates
+from emails import Recipient
 from hal.files.parsers import CSVParser
-
-from . import templates
-from .emails import Recipient
+from hal.streams.user import UserInput
 
 EMAIL_TEMPLATES = {
     "mailing list": templates.Newsletter,
@@ -32,6 +32,7 @@ EMAIL_TEMPLATES = {
     "cakes": templates.CakeRemainder,
     "esito": templates.JobInterviewResult
 }
+USER_INPUT = UserInput()
 TIME_INTERVAL_BETWEEN_EMAILS = 1  # seconds to wait before sending next email
 
 
@@ -58,6 +59,28 @@ def create_and_parse_args():
     }
 
 
+def get_recipient_contacts(raw_data):
+    """
+    :param raw_data: {}
+        Raw recipient data
+    :return: {}
+        Dict with email and name of recipient
+    """
+
+    email = raw_data["Email"]
+
+    try:
+        name_surname = raw_data["Nome"].title() + " " + raw_data[
+            "Cognome"].title()
+    except:
+        name_surname = raw_data["Nome e Cognome"].title()
+
+    return {
+        "name": name_surname,
+        "email": email
+    }
+
+
 def confirm_send_notifications(recipients, email_text_file):
     """
     :param recipients: [] of Mailer
@@ -71,13 +94,13 @@ def confirm_send_notifications(recipients, email_text_file):
     print("Sending emails to\n")
     print("\n".join(
         [
-            ">>> " + recipient["Nome"].title() + " " + recipient[
-                "Cognome"].title() + " (" + recipient["Email"] + ")"
+            ">>> " + get_recipient_contacts(recipient)["name"] +
+            " (" + get_recipient_contacts(recipient)["email"] + ")"
             for recipient in recipients
-            ]
+        ]
     ))
     print("\nwith content from >>> '", email_text_file, "'")
-    return input("\nAre you really sure? [y/n] ").startswith("y")
+    return USER_INPUT.get_yes_no("\nAre you really sure?")
 
 
 def send_notifications(addresses_file, email_text_file, email_template):
@@ -95,8 +118,7 @@ def send_notifications(addresses_file, email_text_file, email_template):
     recipients = list(CSVParser(addresses_file).get_dicts())
     if confirm_send_notifications(recipients, email_text_file):
         for recipient in recipients:
-            name_surname = recipient["Nome"].title() + " " + recipient[
-                "Cognome"].title()
+            name_surname = get_recipient_contacts(recipient)["name"]
 
             template = email_template(
                 name_surname,
